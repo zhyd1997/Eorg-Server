@@ -1,0 +1,1 @@
+The project is using [express application generator](http://expressjs.com/en/starter/generator.html)
