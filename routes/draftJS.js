@@ -77,9 +77,9 @@ router.post('/', (req, res, next) => {
 					console.log('begin err', err)
 					return
 				}
+				appendContent()
 			}
 		)
-		setTimeout(() => appendContent(), 3000)
 	}
 
 	function appendContent() {
