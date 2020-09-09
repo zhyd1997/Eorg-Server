@@ -4,6 +4,11 @@ var fs = require('fs');
 var path = require('path')
 var exec = require('child_process').exec;
 
+const auth = require('../auth')
+const jwt = require('jsonwebtoken')
+const config = require("../config");
+const User = require('../models/user')
+
 /**
  * 1. get raw latex code
  * 2. write it into `.tex` file
@@ -12,25 +17,42 @@ var exec = require('child_process').exec;
  */
 
 /* GET users listing. */
-router.get('/', (req, res, next) => {
-	console.log('sending pdf...\n')
-	var tempFile="./latex/main.pdf";
-	fs.readFile(tempFile, function (err,data){
-		res.contentType("application/pdf");
-		res.send(data)
-	});
-	console.log('\nsent done...\n')
-});
+router.get('/',auth.verifyUser, (req, res, next) => {
+	const userToken = req.headers.authorization;
+	const token = userToken.split(' ');
+	const decoded = jwt.verify(token[1], config.secretKey);
+	const userId = decoded._id;
+	// Fetch the user by id
+	User.findOne({_id: userId}).then(function (user) {
+		// Do something with the user
+		const username = user.username
 
-router.get('/latex', (req, res, next) => {
-	var tempFile="./latex/main.pdf";
-	fs.readFile(tempFile, function (err,data){
-		res.contentType("application/pdf");
-		res.send(data)
+		console.log('sending pdf...\n')
+		const tempFile = `./latex/${username}/main.pdf`;
+		fs.readFile(tempFile, function (err,data){
+			res.contentType("application/pdf");
+			res.send(data)
+		});
+		console.log('\nsent done...\n')
+		// return res.send(200);
 	});
 })
 
-router.post('/', (req, res, next) => {
+router.post('/', auth.verifyUser, (req, res, next) => {
+	const userToken = req.headers.authorization;
+	const token = userToken.split(' ');
+	const decoded = jwt.verify(token[1], config.secretKey);
+	const userId = decoded._id;
+	// Fetch the user by id
+	User.findOne({_id: userId}).then(function (user) {
+		// Do something with the user
+		const username = user.username
+		fs.mkdirSync(`./latex/${username}`, { recursive: true })
+
+		empty(username)
+		setTimeout(() => insertBegin(username), 3000)
+		// return res.send(200);
+	});
 	/**
 	 * compile
 	 * await -> insert `end` template
@@ -49,14 +71,15 @@ router.post('/', (req, res, next) => {
 	const end = '\\end{document}'
 	console.log(body)
 
-	function empty() {
+	function empty(user) {
 		console.log('[1/5] empty ...........')
-		const dir = './latex/'
+		const dir = './latex/' + user
 
 		fs.readdir(
 			dir,
 			(err, files) => {
-				if (err) throw err
+				// if (err) throw err
+				if (err) return
 
 				for (const file of files) {
 					fs.unlink(path.join(dir, file), err1 => {
@@ -66,28 +89,28 @@ router.post('/', (req, res, next) => {
 			})
 	}
 
-	function insertBegin() {
+	function insertBegin(user) {
 		console.log('[2/5] insertBegin........')
 		console.log('-----------begin-----------\n')
 		fs.writeFile(
-			'./latex/main.tex',
+			`./latex/${user}/main.tex`,
 			begin,
 			err => {
 				if (err) {
 					console.log('begin err', err)
 					return
 				}
-				appendContent()
+				appendContent(user)
 			}
 		)
 	}
 
-	function appendContent() {
+	function appendContent(user) {
 		console.log('[3/5] appendContent ............')
 		for (let i = 0; i < body.length; i += 1) {
 			try {
 				fs.appendFileSync(
-					'./latex/main.tex',
+					`./latex/${user}/main.tex`,
 					body[i] + '\r\n' + '\r\n',
 				)
 			} catch (err) {
@@ -95,13 +118,13 @@ router.post('/', (req, res, next) => {
 				return
 			}
 		}
-		appendEnd()
+		appendEnd(user)
 	}
 
-	function appendEnd() {
+	function appendEnd(user) {
 		console.log('[4/5] appendEnd ................\n')
 		try {
-			fs.appendFileSync('./latex/main.tex', end, )
+			fs.appendFileSync(`./latex/${user}/main.tex`, end, )
 		} catch (err) {
 			console.log('end err', err)
 			return
@@ -109,13 +132,13 @@ router.post('/', (req, res, next) => {
 
 		console.log('\n----------- end -----------\n')
 
-		compileTeX()
+		compileTeX(user)
 	}
 
-	function compileTeX() {
+	function compileTeX(user) {
 		console.log('[5/5] compile ..................')
 		console.log('...xelatex is running...\n')
-		exec('cd ./latex && xelatex main.tex', ((error, stdout, stderr) => {
+		exec(`cd ./latex/${user} && xelatex main.tex`, ((error, stdout, stderr) => {
 			if (error instanceof Error) {
 				console.log('latex error: ', error)
 				throw error
@@ -125,9 +148,6 @@ router.post('/', (req, res, next) => {
 			console.log('...xelatex finished...\n')
 		}))
 	}
-
-	empty()
-	setTimeout(insertBegin, 3000)
 
 	res.json({
 		status: 'success',
