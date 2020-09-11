@@ -9,6 +9,36 @@ const jwt = require('jsonwebtoken')
 const config = require("../config");
 const User = require('../models/user')
 
+function getUserId(request) {
+	const userToken = request.headers.authorization;
+	const token = userToken.split(' ');
+	const decoded = jwt.verify(token[1], config.secretKey);
+	const userId = decoded._id;
+
+	return userId
+}
+
+function findUser(request) {
+	return User.findOne({_id: getUserId(request)});
+}
+
+function sendFile(request, response, fileExtension, contentType) {
+	findUser(request)
+		.then((user) => {
+			// Do something with the user
+			const username = user.username
+
+			console.log(`sending ${fileExtension}...\n`)
+			const tempFile = `./latex/${username}/main.${fileExtension}`;
+			fs.readFile(tempFile, function (err, data) {
+				response.contentType(contentType);
+				response.send(data)
+			});
+			console.log('\nsent done...\n')
+			// return res.send(200);
+		})
+}
+
 /**
  * 1. get raw latex code
  * 2. write it into `.tex` file
@@ -18,33 +48,16 @@ const User = require('../models/user')
 
 /* GET users listing. */
 router.get('/',auth.verifyUser, (req, res, next) => {
-	const userToken = req.headers.authorization;
-	const token = userToken.split(' ');
-	const decoded = jwt.verify(token[1], config.secretKey);
-	const userId = decoded._id;
-	// Fetch the user by id
-	User.findOne({_id: userId}).then(function (user) {
-		// Do something with the user
-		const username = user.username
+	sendFile(req, res, 'pdf', 'application/pdf')
+})
 
-		console.log('sending pdf...\n')
-		const tempFile = `./latex/${username}/main.pdf`;
-		fs.readFile(tempFile, function (err,data){
-			res.contentType("application/pdf");
-			res.send(data)
-		});
-		console.log('\nsent done...\n')
-		// return res.send(200);
-	});
+router.get('/tex',auth.verifyUser, (req, res, next) => {
+	sendFile(req, res, 'tex', 'application/x-tex')
 })
 
 router.post('/', auth.verifyUser, (req, res, next) => {
-	const userToken = req.headers.authorization;
-	const token = userToken.split(' ');
-	const decoded = jwt.verify(token[1], config.secretKey);
-	const userId = decoded._id;
-	// Fetch the user by id
-	User.findOne({_id: userId}).then(function (user) {
+	findUser(req)
+		.then(function (user) {
 		// Do something with the user
 		const username = user.username
 		fs.mkdirSync(`./latex/${username}`, { recursive: true })
@@ -52,7 +65,7 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 		empty(username)
 		setTimeout(() => insertBegin(username), 3000)
 		// return res.send(200);
-	});
+		});
 	/**
 	 * compile
 	 * await -> insert `end` template
