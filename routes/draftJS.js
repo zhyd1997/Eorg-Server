@@ -47,7 +47,7 @@ function sendFile(request, response, fileExtension, contentType) {
  */
 
 /* GET users listing. */
-router.get('/',auth.verifyUser, (req, res, next) => {
+router.get('/pdf',auth.verifyUser, (req, res, next) => {
 	sendFile(req, res, 'pdf', 'application/pdf')
 })
 
