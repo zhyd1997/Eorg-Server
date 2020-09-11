@@ -25,7 +25,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var draftJSRouter = require('./routes/draftJS');
 
-var cors = require('cors')
+var cors = require('./routes/cors')
 var app = express();
 
 // view engine setup
@@ -47,9 +47,9 @@ app.use(session({
   cookie: { maxAge: 1000 },
 }))
 
-app.use('/', cors(), indexRouter);
-app.use('/users', cors(), usersRouter);
-app.use('/draftJS', cors(), draftJSRouter)
+app.use('/', cors.corsWithOptions, indexRouter);
+app.use('/users', cors.corsWithOptions, usersRouter);
+app.use('/draftJS', cors.corsWithOptions, draftJSRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
