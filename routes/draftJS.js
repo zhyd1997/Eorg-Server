@@ -159,13 +159,13 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 			console.log('stdout: \n', stdout)
 			console.log('stderr: \n', stderr)
 			console.log('...xelatex finished...\n')
+
+			res.json({
+				status: 'success',
+				body: body
+			})
 		}))
 	}
-
-	res.json({
-		status: 'success',
-		body: body
-	})
 })
 
 module.exports = router;
