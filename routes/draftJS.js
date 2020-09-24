@@ -2,6 +2,7 @@ const express = require('express')
 
 const router = express.Router()
 const fs = require('fs')
+const archiver = require('archiver')
 const path = require('path')
 const { exec } = require('child_process')
 
@@ -48,6 +49,33 @@ function sendFile(request, response, fileExtension, contentType) {
  */
 
 /* GET users listing. */
+router.get('/zip', auth.verifyUser, (req, res) => {
+	findUser(req)
+		.then((user) => {
+			const { username } = user
+			console.log('sending zip archive...\n')
+			const output = fs.createWriteStream(`./latex/${username}/main.zip`)
+			const archive = archiver('zip', {
+				zlib: { level: 9 }
+			})
+			output.on('close', () => {
+				console.log(archive.pointer() + ' total bytes')
+				console.log('archiver has been finalized and the output file descriptor has closed.')
+			})
+			output.on('end', () => {
+				console.log('Data has been drained')
+			})
+			archive.pipe(output)
+			archive.directory(`./latex/${username}/main`, false)
+			archive.finalize()
+			fs.readFile(`./latex/${username}/main.zip`, (err, data) => {
+				res.contentType('application/zip')
+				res.send(data)
+			})
+			console.log('\nsending done...\n')
+		})
+})
+
 router.get('/pdf', auth.verifyUser, (req, res, next) => {
 	sendFile(req, res, 'pdf', 'application/pdf')
 })
