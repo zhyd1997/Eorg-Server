@@ -1,39 +1,40 @@
-var express = require('express');
-var router = express.Router();
-var fs = require('fs');
-var path = require('path')
-var exec = require('child_process').exec;
+const express = require('express')
 
-const auth = require('../auth')
+const router = express.Router()
+const fs = require('fs')
+const path = require('path')
+const { exec } = require('child_process')
+
 const jwt = require('jsonwebtoken')
-const config = require("../config");
+const auth = require('../auth')
+const config = require('../config')
 const User = require('../models/user')
 
 function getUserId(request) {
-	const userToken = request.headers.authorization;
-	const token = userToken.split(' ');
-	const decoded = jwt.verify(token[1], config.secretKey);
-	const userId = decoded._id;
+	const userToken = request.headers.authorization
+	const token = userToken.split(' ')
+	const decoded = jwt.verify(token[1], config.secretKey)
+	const userId = decoded._id
 
 	return userId
 }
 
 function findUser(request) {
-	return User.findOne({_id: getUserId(request)});
+	return User.findOne({ _id: getUserId(request) })
 }
 
 function sendFile(request, response, fileExtension, contentType) {
 	findUser(request)
 		.then((user) => {
 			// Do something with the user
-			const username = user.username
+			const { username } = user
 
 			console.log(`sending ${fileExtension}...\n`)
-			const tempFile = `./latex/${username}/main/main.${fileExtension}`;
-			fs.readFile(tempFile, function (err, data) {
-				response.contentType(contentType);
+			const tempFile = `./latex/${username}/main/main.${fileExtension}`
+			fs.readFile(tempFile, (err, data) => {
+				response.contentType(contentType)
 				response.send(data)
-			});
+			})
 			console.log('\nsent done...\n')
 			// return res.send(200);
 		})
@@ -47,25 +48,25 @@ function sendFile(request, response, fileExtension, contentType) {
  */
 
 /* GET users listing. */
-router.get('/pdf',auth.verifyUser, (req, res, next) => {
+router.get('/pdf', auth.verifyUser, (req, res, next) => {
 	sendFile(req, res, 'pdf', 'application/pdf')
 })
 
-router.get('/tex',auth.verifyUser, (req, res, next) => {
+router.get('/tex', auth.verifyUser, (req, res, next) => {
 	sendFile(req, res, 'tex', 'application/x-tex')
 })
 
 router.post('/tex', auth.verifyUser, (req, res) => {
-	let body = req.body
+	const { body } = req
 	console.log(body)
 
 	findUser(req)
-		.then(function (user) {
+		.then((user) => {
 			// Do something with the user
-			const username = user.username
+			const { username } = user
 			fs.mkdirSync(`./latex/${username}`, { recursive: true })
 
-			fs.writeFile(`./latex/${username}/main.bib`, '', err => {
+			fs.writeFile(`./latex/${username}/main.bib`, '', (err) => {
 				if (err) {
 					console.log('new file err', err)
 					return
@@ -73,12 +74,12 @@ router.post('/tex', auth.verifyUser, (req, res) => {
 				console.log('writing...')
 			})
 
-			for (let item of Object.values(body)) {
+			for (const item of Object.values(body)) {
 				console.log('hhhhhhhhh, Sync.........')
 				try {
 					fs.appendFileSync(
 						`./latex/${username}/main.bib`,
-						item + '\r\n' + '\r\n',
+						`${item}\r\n` + '\r\n',
 					)
 				} catch (err) {
 					console.log('append err', err)
@@ -88,62 +89,61 @@ router.post('/tex', auth.verifyUser, (req, res) => {
 
 			res.json({
 				status: 'success',
-				body: body
+				body,
 			})
-		});
+		})
 })
 
 router.post('/', auth.verifyUser, (req, res, next) => {
 	findUser(req)
-		.then(function (user) {
+		.then((user) => {
 		// Do something with the user
-		const username = user.username
-		let isBib = false
-		fs.mkdirSync(`./latex/${username}`, { recursive: true })
+			const { username } = user
+			let isBib = false
+			fs.mkdirSync(`./latex/${username}`, { recursive: true })
 
-		try {
-			if (fs.existsSync(`./latex/${username}/main.bib`)) {
-				isBib = true
-				console.log('-----------------main.bib--------------')
-			} else {
-				isBib = false
-				console.log('--------------no bib here--------------')
+			try {
+				if (fs.existsSync(`./latex/${username}/main.bib`)) {
+					isBib = true
+					console.log('-----------------main.bib--------------')
+				} else {
+					isBib = false
+					console.log('--------------no bib here--------------')
+				}
+			} catch (err) {
+				console.error(err)
 			}
-		} catch(err) {
-			console.error(err)
-		}
-		console.log(isBib)
-		const begin = isBib ?
-			'\\documentclass[12pt]{article}' +
-			'\r\n' +
-			'\\usepackage[UTF8, scheme = plain, heading = false]{ctex}' +
-			'\r\n' +
-			'\\usepackage[left=20mm,right=20mm,top=25mm, bottom=15mm]{geometry}' +
-			'\r\n' +
-			'\\usepackage[colorlinks=true,pdfstartview=FitH,linkcolor=blue,anchorcolor=violet,citecolor=magenta]{hyperref}' +
-			'\r\n' +
-			'\\usepackage[backend=biber,style=gb7714-2015]{biblatex}' +
-			'\r\n' +
-			'\\addbibresource[location=local]{./main.bib}' +
-			'\r\n' +
-			'\\begin{document}' +
-			'\r\n'
-			:
-			'\\documentclass[12pt]{article}' +
-			'\r\n' +
-			'\\usepackage[UTF8, scheme = plain, heading = false]{ctex}' +
-			'\r\n' +
-			'\\begin{document}' +
-			'\r\n'
-		const end = isBib
-			? '\\printbibliography[heading=bibliography,title=参考文献]\r\n\\end{document}'
-			: '\\end{document}'
+			console.log(isBib)
+			const begin = isBib
+				? '\\documentclass[12pt]{article}'
+			+ '\r\n'
+			+ '\\usepackage[UTF8, scheme = plain, heading = false]{ctex}'
+			+ '\r\n'
+			+ '\\usepackage[left=20mm,right=20mm,top=25mm, bottom=15mm]{geometry}'
+			+ '\r\n'
+			+ '\\usepackage[colorlinks=true,pdfstartview=FitH,linkcolor=blue,anchorcolor=violet,citecolor=magenta]{hyperref}'
+			+ '\r\n'
+			+ '\\usepackage[backend=biber,style=gb7714-2015]{biblatex}'
+			+ '\r\n'
+			+ '\\addbibresource[location=local]{./main.bib}'
+			+ '\r\n'
+			+ '\\begin{document}'
+			+ '\r\n'
+				:			'\\documentclass[12pt]{article}'
+			+ '\r\n'
+			+ '\\usepackage[UTF8, scheme = plain, heading = false]{ctex}'
+			+ '\r\n'
+			+ '\\begin{document}'
+			+ '\r\n'
+			const end = isBib
+				? '\\printbibliography[heading=bibliography,title=参考文献]\r\n\\end{document}'
+				: '\\end{document}'
 
-		empty(username, isBib)
+			empty(username, isBib)
 
-		setTimeout(() => insertBegin(username, isBib, begin, end), 3000)
+			setTimeout(() => insertBegin(username, isBib, begin, end), 3000)
 		// return res.send(200);
-		});
+		})
 	/**
 	 * compile
 	 * await -> insert `end` template
@@ -151,12 +151,12 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 	 * await -> insert `begin` template
 	 * await -> empty `latex` dir
 	 */
-	let body = req.body
+	const { body } = req
 	console.log(body)
 
 	function empty(user, isBib) {
 		console.log('[1/5] empty ...........')
-		const dir = './latex/' + user
+		const dir = `./latex/${user}`
 
 		fs.readdir(
 			dir,
@@ -168,21 +168,20 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 					const filename = path.basename(file)
 					if (isBib === true) {
 						if (filename !== 'main.tex' && filename !== 'main.bib' && filename !== 'main') {
-							fs.unlink(path.join(dir, file), err1 => {
+							fs.unlink(path.join(dir, file), (err1) => {
 								console.log(filename, 'has been removed!')
 								if (err1) throw err1
 							})
 						}
-					} else {
-						if (filename !== 'main.tex' && filename !== 'main') {
-							fs.unlink(path.join(dir, file), err1 => {
-								console.log(filename, 'has been removed!')
-								if (err1) throw err1
-							})
-						}
+					} else if (filename !== 'main.tex' && filename !== 'main') {
+						fs.unlink(path.join(dir, file), (err1) => {
+							console.log(filename, 'has been removed!')
+							if (err1) throw err1
+						})
 					}
 				}
-			})
+			},
+		)
 	}
 
 	function insertBegin(user, isBib, begin, end) {
@@ -191,13 +190,13 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 		fs.writeFile(
 			`./latex/${user}/main.tex`,
 			begin,
-			err => {
+			(err) => {
 				if (err) {
 					console.log('begin err', err)
 					return
 				}
 				appendContent(user, isBib, end)
-			}
+			},
 		)
 	}
 
@@ -207,7 +206,7 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 			try {
 				fs.appendFileSync(
 					`./latex/${user}/main.tex`,
-					body[i] + '\r\n' + '\r\n',
+					`${body[i]}\r\n` + '\r\n',
 				)
 			} catch (err) {
 				console.log('append err', err)
@@ -220,7 +219,7 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 	function appendEnd(user, isBib, end) {
 		console.log('[4/5] appendEnd ................\n')
 		try {
-			fs.appendFileSync(`./latex/${user}/main.tex`, end, )
+			fs.appendFileSync(`./latex/${user}/main.tex`, end)
 		} catch (err) {
 			console.log('end err', err)
 			return
@@ -238,14 +237,14 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 		function RenameFiles(files) {
 			for (let i = 0; i < files.length; i += 1) {
 				fs.rename(`./latex/${user}/${files[i]}`, `./latex/${user}/main/${files[i]}`, (err) => {
-					if (err) throw err;
-					console.log(`Rename ${files[i]} complete!`);
-				});
+					if (err) throw err
+					console.log(`Rename ${files[i]} complete!`)
+				})
 			}
 		}
 
-		isBib ?
-			exec(`cd ./latex/${user} && latexmk -xelatex main.tex`, ((error, stdout, stderr) => {
+		isBib
+			? exec(`cd ./latex/${user} && latexmk -xelatex main.tex`, ((error, stdout, stderr) => {
 				if (error instanceof Error) {
 					console.log('latexmk error: ', error)
 					throw error
@@ -254,36 +253,35 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 				console.log('stderr: \n', stderr)
 				console.log('...latexmk finished...\n')
 				fs.mkdirSync(`./latex/${user}/main`, { recursive: true })
-				let moveFiles = ['main.tex', 'main.bib', 'main.pdf']
+				const moveFiles = ['main.tex', 'main.bib', 'main.pdf']
 
 				RenameFiles(moveFiles)
 
 				res.json({
 					status: 'success',
-					body: body
+					body,
 				})
 			}))
-			:
-		exec(`cd ./latex/${user} && xelatex main.tex`, ((error, stdout, stderr) => {
-			if (error instanceof Error) {
-				console.log('latex error: ', error)
-				throw error
-			}
-			console.log('stdout: \n', stdout)
-			console.log('stderr: \n', stderr)
-			console.log('...xelatex finished...\n')
-			fs.mkdirSync(`./latex/${user}/main`, { recursive: true })
+			:		exec(`cd ./latex/${user} && xelatex main.tex`, ((error, stdout, stderr) => {
+				if (error instanceof Error) {
+					console.log('latex error: ', error)
+					throw error
+				}
+				console.log('stdout: \n', stdout)
+				console.log('stderr: \n', stderr)
+				console.log('...xelatex finished...\n')
+				fs.mkdirSync(`./latex/${user}/main`, { recursive: true })
 
-			let moveFiles = ['main.tex', 'main.pdf']
+				const moveFiles = ['main.tex', 'main.pdf']
 
-			RenameFiles(moveFiles)
+				RenameFiles(moveFiles)
 
-			res.json({
-				status: 'success',
-				body: body
-			})
-		}))
+				res.json({
+					status: 'success',
+					body,
+				})
+			}))
 	}
 })
 
-module.exports = router;
+module.exports = router
