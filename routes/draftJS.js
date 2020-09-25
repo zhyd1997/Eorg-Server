@@ -161,7 +161,7 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 	const { body } = req
 	console.log(body)
 
-	function empty(user, isBib) {
+	function empty(user) {
 		console.log('[1/5] empty ...........')
 		const dir = `./latex/${user}`
 
