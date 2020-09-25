@@ -2,6 +2,9 @@ const express = require('express')
 
 const router = express.Router()
 const fs = require('fs')
+const { finished } = require('stream')
+const { promisify } = require('util')
+const finishedAsync = promisify(finished)
 const archiver = require('archiver')
 const path = require('path')
 const { exec } = require('child_process')
@@ -142,34 +145,10 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 				console.error(err)
 			}
 			console.log(isBib)
-			const begin = isBib
-				? '\\documentclass[12pt]{article}'
-			+ '\r\n'
-			+ '\\usepackage[UTF8, scheme = plain, heading = false]{ctex}'
-			+ '\r\n'
-			+ '\\usepackage[left=20mm,right=20mm,top=25mm, bottom=15mm]{geometry}'
-			+ '\r\n'
-			+ '\\usepackage[colorlinks=true,pdfstartview=FitH,linkcolor=blue,anchorcolor=violet,citecolor=magenta]{hyperref}'
-			+ '\r\n'
-			+ '\\usepackage[backend=biber,style=gb7714-2015]{biblatex}'
-			+ '\r\n'
-			+ '\\addbibresource[location=local]{./main.bib}'
-			+ '\r\n'
-			+ '\\begin{document}'
-			+ '\r\n'
-				:			'\\documentclass[12pt]{article}'
-			+ '\r\n'
-			+ '\\usepackage[UTF8, scheme = plain, heading = false]{ctex}'
-			+ '\r\n'
-			+ '\\begin{document}'
-			+ '\r\n'
-			const end = isBib
-				? '\\printbibliography[heading=bibliography,title=参考文献]\r\n\\end{document}'
-				: '\\end{document}'
 
 			empty(username, isBib)
 
-			setTimeout(() => insertBegin(username, isBib, begin, end), 3000)
+			setTimeout(() => insertBegin(username, isBib), 3000)
 		// return res.send(200);
 		})
 	/**
@@ -192,6 +171,7 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 				// if (err) throw err
 				if (err) return
 
+				// remove old main.* files except for main folder TODO
 				for (const file of files) {
 					const filename = path.basename(file)
 					if (isBib === true) {
@@ -212,23 +192,34 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 		)
 	}
 
-	function insertBegin(user, isBib, begin, end) {
+	function insertBegin(user, isBib) {
 		console.log('[2/5] insertBegin........')
 		console.log('-----------begin-----------\n')
-		fs.writeFile(
-			`./latex/${user}/main.tex`,
-			begin,
-			(err) => {
-				if (err) {
-					console.log('begin err', err)
-					return
-				}
-				appendContent(user, isBib, end)
-			},
-		)
+
+		let readStream
+		const writeStream  = fs.createWriteStream(`./latex/${user}/main.tex`)
+
+		if (isBib) {
+			readStream = fs.createReadStream('./latex/latexmk_begin_template.tex')
+		} else {
+			readStream = fs.createReadStream('./latex/xelatex_begin_template.tex')
+		}
+
+		(async function run() {
+			try {
+				readStream.pipe(writeStream)
+				await finishedAsync(readStream)
+				console.log('Readable is being consumed')
+
+				appendContent(user, isBib)
+			}
+			catch (err) {
+				console.error('insertBegin error', err)
+			}
+		})()
 	}
 
-	function appendContent(user, isBib, end) {
+	function appendContent(user, isBib) {
 		console.log('[3/5] appendContent ............')
 		for (let i = 0; i < body.length; i += 1) {
 			try {
@@ -241,20 +232,24 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 				return
 			}
 		}
-		appendEnd(user, isBib, end)
+		appendEnd(user, isBib)
 	}
 
-	function appendEnd(user, isBib, end) {
+	function appendEnd(user, isBib) {
 		console.log('[4/5] appendEnd ................\n')
+		let end
+		if (isBib) {
+			end = '\\printbibliography[heading=bibliography,title=参考文献]\r\n\\end{document}'
+		} else {
+			end = '\\end{document}'
+		}
 		try {
 			fs.appendFileSync(`./latex/${user}/main.tex`, end)
 		} catch (err) {
 			console.log('end err', err)
 			return
 		}
-
 		console.log('\n----------- end -----------\n')
-
 		compileTeX(user, isBib)
 	}
 
