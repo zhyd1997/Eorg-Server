@@ -171,17 +171,9 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 				// if (err) throw err
 				if (err) return
 
-				// remove old main.* files except for main folder TODO
 				for (const file of files) {
 					const filename = path.basename(file)
-					if (isBib === true) {
-						if (filename !== 'main.tex' && filename !== 'main.bib' && filename !== 'main') {
-							fs.unlink(path.join(dir, file), (err1) => {
-								console.log(filename, 'has been removed!')
-								if (err1) throw err1
-							})
-						}
-					} else if (filename !== 'main.tex' && filename !== 'main') {
+					if (filename !== 'main') {
 						fs.unlink(path.join(dir, file), (err1) => {
 							console.log(filename, 'has been removed!')
 							if (err1) throw err1
