@@ -161,7 +161,7 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 	const { body } = req
 	console.log(body)
 
-	function empty(user) {
+	function empty(user, isBib) {
 		console.log('[1/5] empty ...........')
 		const dir = `./latex/${user}`
 
@@ -173,11 +173,20 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 
 				for (const file of files) {
 					const filename = path.basename(file)
-					if (filename !== 'main') {
-						fs.unlink(path.join(dir, file), (err1) => {
-							console.log(filename, 'has been removed!')
-							if (err1) throw err1
-						})
+					if (isBib) {
+						if (filename !== 'main' && filename !== 'main.bib') {
+							fs.unlink(path.join(dir, file), (err1) => {
+								console.log(filename, 'has been removed!')
+								if (err1) throw err1
+							})
+						}
+					} else {
+						if (filename !== 'main') {
+							fs.unlink(path.join(dir, file), (err1) => {
+								console.log(filename, 'has been removed!')
+								if (err1) throw err1
+							})
+						}
 					}
 				}
 			},
