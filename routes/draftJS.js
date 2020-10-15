@@ -161,6 +161,15 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 	const { body } = req
 	console.log(body)
 
+	function catchError(error) {
+		console.log('error')
+		res.json({
+			status: 'error',
+			body: error,
+		})
+		return null
+	}
+
 	function empty(user, isBib) {
 		console.log('[1/5] empty ...........')
 		const dir = `./latex/${user}`
@@ -168,8 +177,9 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 		fs.readdir(
 			dir,
 			(err, files) => {
-				// if (err) throw err
-				if (err) return
+				if (err) {
+					catchError(err)
+				}
 
 				for (const file of files) {
 					const filename = path.basename(file)
@@ -177,14 +187,18 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 						if (filename !== 'main' && filename !== 'main.bib') {
 							fs.unlink(path.join(dir, file), (err1) => {
 								console.log(filename, 'has been removed!')
-								if (err1) throw err1
+								if (err1) {
+									catchError(err1)
+								}
 							})
 						}
 					} else {
 						if (filename !== 'main') {
 							fs.unlink(path.join(dir, file), (err1) => {
 								console.log(filename, 'has been removed!')
-								if (err1) throw err1
+								if (err1) {
+									catchError(err1)
+								}
 							})
 						}
 					}
@@ -261,7 +275,9 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 		function RenameFiles(files) {
 			for (let i = 0; i < files.length; i += 1) {
 				fs.rename(`./latex/${user}/${files[i]}`, `./latex/${user}/main/${files[i]}`, (err) => {
-					if (err) throw err
+					if (err) {
+						catchError(err)
+					}
 					console.log(`Rename ${files[i]} complete!`)
 				})
 			}
@@ -270,8 +286,7 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 		isBib
 			? exec(`cd ./latex/${user} && latexmk -xelatex main.tex`, ((error, stdout, stderr) => {
 				if (error instanceof Error) {
-					console.log('latexmk error: ', error)
-					throw error
+					catchError(error)
 				}
 				console.log('stdout: \n', stdout)
 				console.log('stderr: \n', stderr)
@@ -288,8 +303,7 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 			}))
 			:		exec(`cd ./latex/${user} && xelatex main.tex`, ((error, stdout, stderr) => {
 				if (error instanceof Error) {
-					console.log('latex error: ', error)
-					throw error
+					catchError(error)
 				}
 				console.log('stdout: \n', stdout)
 				console.log('stderr: \n', stderr)
