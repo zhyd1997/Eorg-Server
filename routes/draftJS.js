@@ -172,14 +172,17 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 
 	function RenameFiles(user, isBib) {
 		const files = isBib ? ['main.tex', 'main.bib', 'main.pdf'] : ['main.tex', 'main.pdf']
-		for (let i = 0; i < files.length; i += 1) {
-			fs.rename(`./latex/${user}/${files[i]}`, `./latex/${user}/main/${files[i]}`, (err) => {
-				if (err) {
-					catchError(err)
-				}
-				console.log(`Rename ${files[i]} complete!`)
-			})
-		}
+		files.forEach((file) => {
+			fs.rename(
+				`./latex/${user}/${file}`,
+				`./latex/${user}/main/${file}`,
+				(err) => {
+					if (err) {
+						catchError(err)
+					}
+					console.log(`Rename ${file} complete!`)
+				})
+		})
 	}
 
 	function empty(user, isBib) {
