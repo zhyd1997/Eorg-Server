@@ -170,6 +170,18 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 		return null
 	}
 
+	function RenameFiles(user, isBib) {
+		const files = isBib ? ['main.tex', 'main.bib', 'main.pdf'] : ['main.tex', 'main.pdf']
+		for (let i = 0; i < files.length; i += 1) {
+			fs.rename(`./latex/${user}/${files[i]}`, `./latex/${user}/main/${files[i]}`, (err) => {
+				if (err) {
+					catchError(err)
+				}
+				console.log(`Rename ${files[i]} complete!`)
+			})
+		}
+	}
+
 	function empty(user, isBib) {
 		console.log('[1/5] empty ...........')
 		const dir = `./latex/${user}`
@@ -272,17 +284,6 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 		console.log('[5/5] compile ..................')
 		console.log('...xelatex is running...\n')
 
-		function RenameFiles(files) {
-			for (let i = 0; i < files.length; i += 1) {
-				fs.rename(`./latex/${user}/${files[i]}`, `./latex/${user}/main/${files[i]}`, (err) => {
-					if (err) {
-						catchError(err)
-					}
-					console.log(`Rename ${files[i]} complete!`)
-				})
-			}
-		}
-
 		isBib
 			? exec(`cd ./latex/${user} && latexmk -xelatex main.tex`, ((error, stdout, stderr) => {
 				if (error instanceof Error) {
@@ -292,16 +293,14 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 				console.log('stderr: \n', stderr)
 				console.log('...latexmk finished...\n')
 				fs.mkdirSync(`./latex/${user}/main`, { recursive: true })
-				const moveFiles = ['main.tex', 'main.bib', 'main.pdf']
-
-				RenameFiles(moveFiles)
+				RenameFiles(user, isBib)
 
 				res.json({
 					status: 'success',
 					body,
 				})
 			}))
-			:		exec(`cd ./latex/${user} && xelatex main.tex`, ((error, stdout, stderr) => {
+			: exec(`cd ./latex/${user} && xelatex main.tex`, ((error, stdout, stderr) => {
 				if (error instanceof Error) {
 					catchError(error)
 				}
@@ -310,9 +309,7 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 				console.log('...xelatex finished...\n')
 				fs.mkdirSync(`./latex/${user}/main`, { recursive: true })
 
-				const moveFiles = ['main.tex', 'main.pdf']
-
-				RenameFiles(moveFiles)
+				RenameFiles(user, isBib)
 
 				res.json({
 					status: 'success',
