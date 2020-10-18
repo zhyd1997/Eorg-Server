@@ -36,7 +36,18 @@ const storage = multer.diskStorage({
 		cb(null, file.originalname)
 	},
 })
-const upload = multer({ storage: storage })
+
+const imageFileFilter = (req, file, cb) => {
+	if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+		return cb(new Error('You can upload only image files!'), false)
+	}
+	cb(null, true)
+}
+
+const upload = multer({
+	storage,
+	fileFilter: imageFileFilter,
+})
 
 router.get('/:blockKey', auth.verifyUser, (req, res) => {
 	Figure.find({ key: req.params.blockKey})
