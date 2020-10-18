@@ -24,6 +24,7 @@ mongoose.connect(url)
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var draftJSRouter = require('./routes/draftJS');
+var figureRouter = require('./routes/figure')
 
 var cors = require('./routes/cors')
 var app = express();
@@ -50,6 +51,7 @@ app.use(session({
 app.use('/', cors.corsWithOptions, indexRouter);
 app.use('/users', cors.corsWithOptions, usersRouter);
 app.use('/draftJS', cors.corsWithOptions, draftJSRouter)
+app.use('/figure', cors.corsWithOptions, figureRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -198,8 +198,9 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 
 				for (const file of files) {
 					const filename = path.basename(file)
+					console.log(filename)
 					if (isBib) {
-						if (filename !== 'main' && filename !== 'main.bib') {
+						if (filename !== 'main' && filename !== 'main.bib' && filename !== 'images') {
 							fs.unlink(path.join(dir, file), (err1) => {
 								console.log(filename, 'has been removed!')
 								if (err1) {
@@ -208,7 +209,7 @@ router.post('/', auth.verifyUser, (req, res, next) => {
 							})
 						}
 					} else {
-						if (filename !== 'main') {
+						if (filename !== 'main' && filename !== 'images') {
 							fs.unlink(path.join(dir, file), (err1) => {
 								console.log(filename, 'has been removed!')
 								if (err1) {
