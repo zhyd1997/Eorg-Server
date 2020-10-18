@@ -28,11 +28,7 @@ const storage = multer.diskStorage({
 			.then((user) => {
 				const { username } = user
 				const dir = `./latex/${username}/images`
-				if (!fs.existsSync(dir)){
-					fs.mkdirSync(dir);
-				} else {
-					console.log('dir exits!!!')
-				}
+				fs.mkdirSync(dir, { recursive: true })
 				cb(null, dir)
 			})
 	},
