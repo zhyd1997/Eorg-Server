@@ -17,13 +17,13 @@ mongoose.set("useUnifiedTopology", true);
 
 const url = process.env.mongoUrl;
 mongoose
-	.connect(url)
-	.then(() => {
-		console.log("Successfully Connected to theMongodb Database..");
-	})
-	.catch(() => {
-		console.log("Error Connected to the Mongodb Database...");
-	});
+  .connect(url)
+  .then(() => {
+    console.log("Successfully Connected to theMongodb Database..");
+  })
+  .catch(() => {
+    console.log("Error Connected to the Mongodb Database...");
+  });
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
@@ -46,12 +46,12 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use(passport.initialize());
 app.use(
-	session({
-		secret: "secret",
-		saveUninitialized: false,
-		resave: false,
-		cookie: { maxAge: 1000 },
-	})
+  session({
+    secret: "secret",
+    saveUninitialized: false,
+    resave: false,
+    cookie: { maxAge: 1000 },
+  })
 );
 
 app.use("/", cors.corsWithOptions, indexRouter);
@@ -61,18 +61,18 @@ app.use("/figure", cors.corsWithOptions, figureRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-	next(createError(404));
+  next(createError(404));
 });
 
 // error handler
 app.use(function (err, req, res, next) {
-	// set locals, only providing error in development
-	res.locals.message = err.message;
-	res.locals.error = req.app.get("env") === "development" ? err : {};
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get("env") === "development" ? err : {};
 
-	// render the error page
-	res.status(err.status || 500);
-	res.render("error");
+  // render the error page
+  res.status(err.status || 500);
+  res.render("error");
 });
 
 module.exports = app;
