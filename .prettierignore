@@ -1,0 +1,12 @@
+# Ignore artifacts:
+build
+coverage
+
+.husky
+.vscode
+
+.prettierrc.json
+package.json
+
+public
+views

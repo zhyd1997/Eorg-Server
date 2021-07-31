@@ -1,5 +1,5 @@
-const mongoose = require('mongoose')
-const { Schema } = mongoose
+const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
 const figureSchema = new Schema({
 	path: {
@@ -12,8 +12,8 @@ const figureSchema = new Schema({
 	},
 	user: {
 		type: mongoose.Schema.Types.ObjectId,
-		ref: 'User',
+		ref: "User",
 	},
-})
+});
 
-module.exports = mongoose.model('Figure', figureSchema)
+module.exports = mongoose.model("Figure", figureSchema);

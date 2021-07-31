@@ -13,6 +13,5 @@ routes/users.js
 
 app.js
 auth.js
-config.js
 
 .eslintrc.js
