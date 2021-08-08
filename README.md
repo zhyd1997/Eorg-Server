@@ -14,11 +14,11 @@ Before start, add a `.env` file in project root.
 	MONGO_URI=<Your own MongoDB url which can get from MongoDB Atlas>
 
 	SMTP_HOST=<Retrieve SMTP_ fields from https://mailtrap.io/>
-	SMTP_PORT=<>
-	SMTP_USER=<>
-	SMTP_PWD=<>
-	FROM_EMAIL=<>
-	FROM_NAME=<>
+	SMTP_PORT=<...>
+	SMTP_USER=<...>
+	SMTP_PWD=<...>
+	FROM_EMAIL=<...>
+	FROM_NAME=<...>
 
 	JWT_SECRET=<Your custom secret key>
 	JWT_EXPIRE=<Custom>
