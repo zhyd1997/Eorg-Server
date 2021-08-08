@@ -1,68 +1,48 @@
-var createError = require("http-errors");
-var express = require("express");
-var path = require("path");
-// var cookieParser = require('cookie-parser');
-var logger = require("morgan");
-
-const session = require("express-session");
-const passport = require("passport");
+const express = require("express");
+const path = require("path");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
 const dotenv = require("dotenv");
 const connectDB = require("./db");
+const errorHandler = require("./middleware/errorHandler");
 
-// Load env vars
+// load env vars
 dotenv.config();
 
-// Connect to DB
+// connect to DB
 connectDB();
 
-var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
-var draftJSRouter = require("./routes/draftJS");
-var figureRouter = require("./routes/figure");
+// route files
+const auth = require("./routes/auth");
+const users = require("./routes/users");
+// const draftJSRouter = require("./routes/draftJS");
+// const figureRouter = require("./routes/figure");
 
-var cors = require("./routes/cors");
-var app = express();
+const cors = require("./routes/cors");
+const app = express();
 
-// view engine setup
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "pug");
-
-app.use(logger("dev"));
+// body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// app.use(cookieParser());
-// app.use(express.static(path.join(__dirname, 'public')));
+// cookie parser
+app.use(cookieParser());
 
-app.use(passport.initialize());
-app.use(
-	session({
-		secret: "secret",
-		saveUninitialized: false,
-		resave: false,
-		cookie: { maxAge: 1000 },
-	})
-);
+// dev logger middleware
+if (process.env.NODE_ENV === "development") {
+	app.use(logger("dev"));
+}
 
-app.use("/", cors.corsWithOptions, indexRouter);
-app.use("/users", cors.corsWithOptions, usersRouter);
-app.use("/draftJS", cors.corsWithOptions, draftJSRouter);
-app.use("/figure", cors.corsWithOptions, figureRouter);
+// set static folder
+app.use(express.static(path.join(__dirname, "public")));
 
-// catch 404 and forward to error handler
-app.use(function (req, res, next) {
-	next(createError(404));
-});
+// mount routers
+app.use("/api/v1/auth", cors.corsWithOptions, auth);
+app.use("/api/v1/users", cors.corsWithOptions, users);
+// app.use("/draftJS", cors.corsWithOptions, draftJSRouter);
+// app.use("/figure", cors.corsWithOptions, figureRouter);
 
 // error handler
-app.use(function (err, req, res, next) {
-	// set locals, only providing error in development
-	res.locals.message = err.message;
-	res.locals.error = req.app.get("env") === "development" ? err : {};
-
-	// render the error page
-	res.status(err.status || 500);
-	res.render("error");
-});
+app.use(errorHandler);
 
 module.exports = app;

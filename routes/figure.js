@@ -17,7 +17,7 @@ const User = require("../models/user");
 function getUserId(request) {
 	const userToken = request.headers.authorization;
 	const token = userToken.split(" ");
-	const decoded = jwt.verify(token[1], process.env.secretKey);
+	const decoded = jwt.verify(token[1], process.env.JWT_SECRET);
 
 	return decoded._id; // userID
 }
