@@ -9,5 +9,5 @@ Before start, add a `.env` file in project root.
 
 ```env
 	secretKey='Your custom secret key'
-	mongoUrl='Your own MongoDB url which can get from MongoDB Atlas'
+	MONGO_URI='Your own MongoDB url which can get from MongoDB Atlas'
 ```
