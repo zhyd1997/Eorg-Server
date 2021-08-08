@@ -8,6 +8,6 @@ for compiling `.tex` files.
 Before start, add a `.env` file in project root.
 
 ```env
-	secretKey='Your custom secret key'
+	JWT_SECRET='Your custom secret key'
 	MONGO_URI='Your own MongoDB url which can get from MongoDB Atlas'
 ```
