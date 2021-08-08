@@ -1,5 +1,4 @@
 var express = require("express");
-const User = require("../models/User");
 const { getUsers } = require("../controllers/users");
 
 const router = express.Router({ mergeParams: true });
