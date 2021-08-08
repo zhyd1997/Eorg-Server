@@ -7,23 +7,13 @@ var logger = require("morgan");
 const session = require("express-session");
 const passport = require("passport");
 const dotenv = require("dotenv");
+const connectDB = require("./db");
 
-dotenv.config({ path: "./.env" });
+// Load env vars
+dotenv.config();
 
-const mongoose = require("mongoose");
-
-mongoose.set("useNewUrlParser", true);
-mongoose.set("useUnifiedTopology", true);
-
-const url = process.env.mongoUrl;
-mongoose
-	.connect(url)
-	.then(() => {
-		console.log("Successfully Connected to theMongodb Database..");
-	})
-	.catch(() => {
-		console.log("Error Connected to the Mongodb Database...");
-	});
+// Connect to DB
+connectDB();
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
