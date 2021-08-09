@@ -33,12 +33,16 @@ if (process.env.NODE_ENV === "development") {
 	app.use(logger("dev"));
 }
 
+// enable CORS
+app.use(cors.cors);
+app.options("*", cors.corsWithOptions);
+
 // set static folder
 app.use(express.static(path.join(__dirname, "public")));
 
 // mount routers
-app.use("/api/v1/auth", cors.corsWithOptions, auth);
-app.use("/api/v1/users", cors.corsWithOptions, users);
+app.use("/api/v1/auth", auth);
+app.use("/api/v1/users", users);
 // app.use("/draftJS", cors.corsWithOptions, draftJSRouter);
 // app.use("/figure", cors.corsWithOptions, figureRouter);
 
