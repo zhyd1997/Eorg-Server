@@ -10,10 +10,10 @@ const User = require("../models/User");
  * @access  Public
  */
 exports.register = asyncHandler(async (req, res, next) => {
-	const { name, email, password, role } = req.body;
+	const { username, email, password, role } = req.body;
 
 	// create user
-	const user = await User.create({ name, email, password, role });
+	const user = await User.create({ username, email, password, role });
 
 	sendTokenResponse(user, 201, res);
 });
@@ -103,9 +103,9 @@ exports.updatePassword = asyncHandler(async (req, res, next) => {
  * @access  Private
  */
 exports.updateDetails = asyncHandler(async (req, res, next) => {
-	const { name, email } = req.body;
+	const { username, email } = req.body;
 
-	const fieldsToUpdate = { name, email };
+	const fieldsToUpdate = { username, email };
 
 	const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
 		new: true,
@@ -206,5 +206,5 @@ const sendTokenResponse = (user, statusCode, res) => {
 	res
 		.status(statusCode)
 		.cookie("token", token, options)
-		.json({ success: true, token });
+		.json({ success: true, token, username: user.username });
 };
