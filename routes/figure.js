@@ -11,8 +11,8 @@ dotenv.config({ path: "./.env" });
 
 const jwt = require("jsonwebtoken");
 const auth = require("../auth");
-const Figure = require("../models/figure");
-const User = require("../models/user");
+const Figure = require("../models/Figure");
+const User = require("../models/User");
 
 function getUserId(request) {
 	const userToken = request.headers.authorization;

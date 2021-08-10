@@ -1,19 +1,22 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const figureSchema = new Schema({
-	path: {
-		type: String,
-		require: true,
+const Figure = new Schema(
+	{
+		path: {
+			type: String,
+			require: true,
+		},
+		key: {
+			type: String,
+			require: true,
+		},
+		user: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "User",
+		},
 	},
-	key: {
-		type: String,
-		require: true,
-	},
-	user: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: "User",
-	},
-});
+	{ timestamps: true }
+);
 
-module.exports = mongoose.model("Figure", figureSchema);
+module.exports = mongoose.model("Figure", Figure);
