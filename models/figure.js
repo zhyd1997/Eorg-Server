@@ -7,9 +7,9 @@ const Figure = new Schema(
 			type: String,
 			require: true,
 		},
-		key: {
+		blockKey: {
 			type: String,
-			require: true,
+			require: [true, "Please add your blockKey"],
 		},
 		user: {
 			type: mongoose.Schema.Types.ObjectId,

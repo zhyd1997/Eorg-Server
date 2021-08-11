@@ -21,7 +21,7 @@ connectDB();
 const auth = require("./routes/auth");
 const users = require("./routes/users");
 // const draftJSRouter = require("./routes/draftJS");
-// const figureRouter = require("./routes/figure");
+const figures = require("./routes/figures");
 
 const cors = require("./routes/cors");
 const app = express();
@@ -65,7 +65,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/api/v1/auth", auth);
 app.use("/api/v1/users", users);
 // app.use("/draftJS", cors.corsWithOptions, draftJSRouter);
-// app.use("/figure", cors.corsWithOptions, figureRouter);
+app.use("/api/v1/figures", figures);
 
 // error handler
 app.use(errorHandler);
