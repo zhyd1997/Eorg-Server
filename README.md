@@ -1,11 +1,13 @@
 ![GitHub](https://img.shields.io/github/license/zhyd1997/Eorg-Server)
 
-The project is using [express application generator](http://expressjs.com/en/starter/generator.html)
+This is the backend of [Eorg](https://github.com/zhyd1997/Eorg).
 
-Your machine must have installed [TeXLive](https://www.tug.org/texlive/) to support
-for compiling `.tex` files.
+## Before start
 
-Before start, add a `.env` file in project root.
+1. Your machine must have installed [TeXLive](https://www.tug.org/texlive/) to support
+   for compiling `.tex` files. (except for you don't want to integrate with FE.)
+
+2. Add a `.env` file in the project root path.
 
 ```env
 	NODE_ENV=development | production
@@ -23,4 +25,11 @@ Before start, add a `.env` file in project root.
 	JWT_SECRET=Your custom secret key
 	JWT_EXPIRE=Custom
 	JWT_COOKIE_EXPIRE=Custom
+```
+
+## How to start
+
+```bash
+	yarn install
+	yarn start
 ```
