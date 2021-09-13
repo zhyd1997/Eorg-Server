@@ -37,5 +37,5 @@ This is the backend of [Eorg](https://github.com/zhyd1997/Eorg), and it is used 
 
 ```bash
 	yarn install
-	yarn start
+	DEBUG=Eorg-Server:* yarn start
 ```
