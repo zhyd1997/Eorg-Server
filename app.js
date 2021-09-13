@@ -8,14 +8,14 @@ const xss = require("xss-clean");
 const rateLimit = require("express-rate-limit");
 const hpp = require("hpp");
 const dotenv = require("dotenv");
-const connectDB = require("./db");
+const db = require("./db");
 const errorHandler = require("./middleware/errorHandler");
 
 // load env vars
 dotenv.config();
 
 // connect to DB
-connectDB();
+db.connect();
 
 // route files
 const auth = require("./routes/auth");
