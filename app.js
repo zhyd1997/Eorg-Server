@@ -35,7 +35,7 @@ app.use(cookieParser());
 
 // dev logger middleware
 if (process.env.NODE_ENV === "development") {
-	app.use(logger("dev"));
+  app.use(logger("dev"));
 }
 
 // senitize data
