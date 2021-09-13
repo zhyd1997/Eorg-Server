@@ -11,26 +11,26 @@ const Figure = require("../models/Figure");
  * @access  Private
  */
 exports.upload = asyncHandler(async (req, res, next) => {
-	const user = await User.findById(req.user.id);
+  const user = await User.findById(req.user.id);
 
-	const { blockKey } = req.body;
+  const { blockKey } = req.body;
 
-	if (!blockKey) {
-		return next(new ErrorResponse("Please add a blockKey", 403));
-	}
+  if (!blockKey) {
+    return next(new ErrorResponse("Please add a blockKey", 403));
+  }
 
-	try {
-		await Figure.create({
-			path: `./latex/${user.username}/images/${req.file.filename}`,
-			blockKey,
-			user,
-		});
+  try {
+    await Figure.create({
+      path: `./latex/${user.username}/images/${req.file.filename}`,
+      blockKey,
+      user,
+    });
 
-		res.status(201).json({ success: true });
-	} catch (err) {
-		console.log(err);
-		return next(new ErrorResponse(err, 400));
-	}
+    res.status(201).json({ success: true });
+  } catch (err) {
+    console.log(err);
+    return next(new ErrorResponse(err, 400));
+  }
 });
 
 /**
@@ -39,13 +39,13 @@ exports.upload = asyncHandler(async (req, res, next) => {
  * @access  Private
  */
 exports.retrieve = asyncHandler(async (req, res, next) => {
-	const figure = await Figure.find({ key: req.params.blockKey });
+  const figure = await Figure.find({ key: req.params.blockKey });
 
-	try {
-		fs.readFile(path.join(__dirname, figure[0].path), (err, data) => {
-			res.status(200).send(data);
-		});
-	} catch (err) {
-		return next(new ErrorResponse(err, 400));
-	}
+  try {
+    fs.readFile(path.join(__dirname, figure[0].path), (err, data) => {
+      res.status(200).send(data);
+    });
+  } catch (err) {
+    return next(new ErrorResponse(err, 400));
+  }
 });
