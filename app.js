@@ -24,6 +24,7 @@ const users = require("./routes/users");
 const figures = require("./routes/figures");
 
 const cors = require("./routes/cors");
+const { AUTH_URI, USER_URI, FIGURE_URI } = require("./constants");
 const app = express();
 
 // body parser
@@ -62,10 +63,10 @@ app.options("*", cors.corsWithOptions);
 app.use(express.static(path.join(__dirname, "public")));
 
 // mount routers
-app.use("/api/v1/auth", auth);
-app.use("/api/v1/users", users);
+app.use(AUTH_URI, auth);
+app.use(USER_URI, users);
 // app.use("/draftJS", cors.corsWithOptions, draftJSRouter);
-app.use("/api/v1/figures", figures);
+app.use(FIGURE_URI, figures);
 
 // error handler
 app.use(errorHandler);
