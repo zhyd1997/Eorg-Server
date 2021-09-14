@@ -176,4 +176,104 @@ describe("auth", () => {
         });
     });
   });
+
+  describe("getProfile", () => {
+    it("returns user info", (done) => {
+      request(app)
+        .get(`${AUTH_URI}/profile`)
+        .auth(tokenNoBearerPrefix, { type: "bearer" })
+        .expect(200)
+        .then((res) => {
+          const { success, user } = res.body;
+
+          console.log(user);
+          expect(success).toBe(true);
+
+          done();
+        })
+        .catch((err) => {
+          console.log(err);
+          done(err);
+        });
+    });
+  });
+
+  describe("updatePassword", () => {
+    it("fails when current password is incorrect", (done) => {
+      const mockedUpdate = {
+        currentPassword: "test1234",
+        newPassword: "test123new",
+      };
+
+      request(app)
+        .put(`${AUTH_URI}/updatepassword`)
+        .auth(tokenNoBearerPrefix, { type: "bearer" })
+        .send(mockedUpdate)
+        .expect(401)
+        .then((res) => {
+          const { error } = res.body;
+
+          expect(error).toBe("Password is incorrect");
+
+          done();
+        })
+        .catch((err) => {
+          console.log(err);
+          done(err);
+        });
+    });
+
+    it("updates successfully", (done) => {
+      const mockedUpdate = {
+        currentPassword: "test123",
+        newPassword: "test123new",
+      };
+
+      request(app)
+        .put(`${AUTH_URI}/updatepassword`)
+        .auth(tokenNoBearerPrefix, { type: "bearer" })
+        .send(mockedUpdate)
+        .expect(200)
+        .expect("set-cookie", /^token=/)
+        .then((res) => {
+          const { success } = res.body;
+
+          expect(success).toBe(true);
+
+          done();
+        })
+        .catch((err) => {
+          console.log(err);
+          done(err);
+        });
+    });
+  });
+
+  describe("updateDetails", () => {
+    it("updates successfully", (done) => {
+      const mockedUpdatedDetails = {
+        username: "testNew",
+        email: "testNew@test.com",
+      };
+
+      request(app)
+        .put(`${AUTH_URI}/updatedetails`)
+        .auth(tokenNoBearerPrefix, { type: "bearer" })
+        .send(mockedUpdatedDetails)
+        .expect(200)
+        .then((res) => {
+          const { success, data } = res.body;
+          const { username, email } = data;
+
+          expect(success).toBe(true);
+          expect({ username, email }).toStrictEqual(mockedUpdatedDetails);
+
+          done();
+        })
+        .catch((err) => {
+          console.log(err);
+          done(err);
+        });
+    });
+  });
 });
