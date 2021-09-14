@@ -1,9 +1,13 @@
+# dependencies
 node_modules
-.idea
 
+# testing
+coverage
+
+# misc
 .env
-
+.idea
 yarn-error.log
+**/*.DS_Store
 
 globalConfig.json
-**/*.DS_Store
