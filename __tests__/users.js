@@ -16,8 +16,8 @@ describe("users", () => {
 
   describe("getUsers", () => {
     const mockedUser = {
-      username: "test",
-      email: "test@test.com",
+      username: "test2",
+      email: "test2@test.com",
       password: "test123",
     };
 
@@ -33,7 +33,7 @@ describe("users", () => {
 
           expect(success).toBe(true);
           expect(token).toBeTruthy();
-          expect(username).toBe("test");
+          expect(username).toBe("test2");
 
           done();
         })
@@ -101,7 +101,7 @@ describe("users", () => {
           const { success, count } = res.body;
 
           expect(success).toBe(true);
-          expect(count).toBe(2); // test and admin registered above.
+          expect(count).toBe(3); // TODO magic number
 
           done();
         })
