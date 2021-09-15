@@ -6,5 +6,5 @@ module.exports = {
     instance: {},
     autoStart: false,
   },
-  mongoURLEnvName: process.env.MONGO_URI,
+  mongoURLEnvName: "MONGO_URI",
 };
