@@ -20,14 +20,14 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      
+
       # Runs a single command using the runners shell
       - name: Install dependencies
         run: yarn --frozen-lockfile
-        
+
       # Runs a single command using the runners shell
       - name: Run test
-            run: |
-                touch .env
-                echo JWT_SECRET =${{ secrets.JWT_SECRET }} >> .env
-        run: yarn test -i
+        run: |
+          touch .env
+          echo JWT_SECRET =${{ secrets.JWT_SECRET }} >> .env
+          yarn test -i 
