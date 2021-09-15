@@ -3,7 +3,7 @@ const User = require("../models/User");
 
 /**
  * @desc Get all users
- * @route GET /api/v1/auth/users
+ * @route GET /api/v1/users
  * @access Private/Admin
  */
 exports.getUsers = asyncHandler(async (req, res, next) => {
