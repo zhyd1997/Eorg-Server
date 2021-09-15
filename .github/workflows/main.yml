@@ -32,4 +32,8 @@ jobs:
           echo JWT_SECRET =${{ secrets.JWT_SECRET }} >> .env
           echo JWT_EXPIRE =${{ secrets.JWT_EXPIRE }} >> .env
           echo JWT_COOKIE_EXPIRE =${{ secrets.JWT_COOKIE_EXPIRE }} >> .env
-          yarn test -i 
+          yarn test -i
+      - name: Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          flags: unittests
