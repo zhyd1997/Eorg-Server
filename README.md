@@ -1,3 +1,4 @@
+[![codecov](https://codecov.io/gh/zhyd1997/Eorg-Server/branch/main/graph/badge.svg?token=1UK7MRPQLO)](https://codecov.io/gh/zhyd1997/Eorg-Server)
 ![GitHub](https://img.shields.io/github/license/zhyd1997/Eorg-Server)
 
 This is the backend of [Eorg](https://github.com/zhyd1997/Eorg), and it is used to:
