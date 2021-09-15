@@ -27,4 +27,7 @@ jobs:
         
       # Runs a single command using the runners shell
       - name: Run test
+            run: |
+                touch .env
+                echo JWT_SECRET =${{ secrets.JWT_SECRET }} >> .env
         run: yarn test -i
