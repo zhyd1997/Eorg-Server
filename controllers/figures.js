@@ -7,7 +7,7 @@ const Figure = require("../models/Figure");
 
 /**
  * @desc    Upload image
- * @route   POST /api/v1/figure/upload
+ * @route   POST /api/v1/figures/upload
  * @access  Private
  */
 exports.upload = asyncHandler(async (req, res, next) => {
@@ -35,11 +35,11 @@ exports.upload = asyncHandler(async (req, res, next) => {
 
 /**
  * @desc    Retrieve image
- * @route   GET /api/v1/figure/:blockKey
+ * @route   GET /api/v1/figures/:blockKey
  * @access  Private
  */
 exports.retrieve = asyncHandler(async (req, res, next) => {
-  const figure = await Figure.find({ key: req.params.blockKey });
+  const figure = await Figure.find({ blockKey: req.params.blockKey });
 
   try {
     fs.readFile(path.join(__dirname, figure[0].path), (err, data) => {

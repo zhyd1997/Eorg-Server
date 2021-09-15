@@ -1,9 +1,9 @@
 const db = require("../db");
 const request = require("supertest");
 const app = require("../app");
-const { AUTH_URI, USER_URI } = require("../constants");
+const { AUTH_URI, FIGURE_URI } = require("../constants");
 
-describe("users", () => {
+describe("figures", () => {
   beforeAll(() => {
     db.connect();
   });
@@ -14,11 +14,11 @@ describe("users", () => {
 
   let tokenNoBearerPrefix;
 
-  describe("getUsers", () => {
-    it("registers normal user successfully", (done) => {
+  describe("upload", () => {
+    it("registers a tempory user successfully", (done) => {
       const mockedUser = {
-        username: "getUsers",
-        email: "getUsers@test.com",
+        username: "upload",
+        email: "upload@test.com",
         password: "test123",
       };
 
@@ -33,7 +33,7 @@ describe("users", () => {
 
           expect(success).toBe(true);
           expect(token).toBeTruthy();
-          expect(username).toBe("getUsers");
+          expect(username).toBe("upload");
 
           done();
         })
@@ -43,18 +43,15 @@ describe("users", () => {
         });
     });
 
-    it("returns an error if user has no admin role", (done) => {
+    it("returns error when missing blockKey", (done) => {
       request(app)
-        .get(`${USER_URI}/users`)
+        .post(`${FIGURE_URI}/upload`)
         .auth(tokenNoBearerPrefix, { type: "bearer" })
+        .attach("test", `${__dirname}/data/test.jpeg`)
         .expect(403)
         .then((res) => {
           const { error } = res.body;
-
-          expect(error).toBe(
-            "User role user is not authorized to access this route"
-          );
-
+          expect(error).toBe("Please add a blockKey");
           done();
         })
         .catch((err) => {
@@ -63,46 +60,30 @@ describe("users", () => {
         });
     });
 
-    it("registers an admin successfully", (done) => {
-      const mockedAdmin = {
-        username: "admin",
-        email: "admin@admin.com",
-        password: "admin123",
-        role: "admin",
-      };
-
+    it("uploads successfully", (done) => {
       request(app)
-        .post(`${AUTH_URI}/register`)
-        .send(mockedAdmin)
+        .post(`${FIGURE_URI}/upload`)
+        .auth(tokenNoBearerPrefix, { type: "bearer" })
+        .attach("test", `${__dirname}/data/test.jpeg`)
+        .field("blockKey", "blockKey")
         .expect(201)
         .then((res) => {
-          const { success, token, username } = res.body;
-
-          tokenNoBearerPrefix = token;
-
+          const { success } = res.body;
           expect(success).toBe(true);
-          expect(token).toBeTruthy();
-          expect(username).toBe("admin");
-
           done();
         })
         .catch((err) => {
-          console.log(err);
+          console.error(err);
           done(err);
         });
     });
 
-    it("returns all users", (done) => {
+    it("retrives image successfully", (done) => {
       request(app)
-        .get(`${USER_URI}/`)
+        .get(`${FIGURE_URI}/blockKey`)
         .auth(tokenNoBearerPrefix, { type: "bearer" })
         .expect(200)
         .then((res) => {
-          const { success, count } = res.body;
-
-          expect(success).toBe(true);
-          expect(count).toBeGreaterThan(1);
-
           done();
         })
         .catch((err) => {
