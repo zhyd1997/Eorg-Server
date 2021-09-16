@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 const asyncHandler = require("../middleware/asyncHandler");
 const ErrorResponse = require("../utils/errorResponse");
 const sendEmail = require("../utils/sendEmail");
@@ -132,17 +133,52 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
   // get reset token
   const resetToken = await user.getResetPasswordToken();
 
+  console.warn(resetToken);
+
   await user.save({ validateBeforeSave: false });
 
   // send reset token
-  const message = `You are receiving this email because you (or someone else) has request the reset of password. This is your reset token: \n\n ${resetToken}`;
+  const messageText = `You are receiving this email because you (or someone else) has request the reset of password. This is your reset token: \n\n ${resetToken}`;
+
+  // define nodemailer config and message here.
+  let config, message;
 
   try {
-    await sendEmail({
-      email: user.email,
-      subject: "Password reset token",
-      message,
-    });
+    if (process.env.NODE_ENV === "production") {
+      config = {
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PWD,
+        },
+      };
+      message = {
+        from: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
+        to: user.email,
+        subject: "Password reset token",
+        text: messageText,
+      };
+    } else {
+      const account = await nodemailer.createTestAccount();
+      config = {
+        host: account.smtp.host,
+        port: account.smtp.port,
+        secure: account.smtp.secure,
+        auth: {
+          user: account.user,
+          pass: account.pass,
+        },
+      };
+      message = {
+        from: "Sender Name <sender@example.com>",
+        to: "Recipient <recipient@example.com>",
+        subject: "password test reset token",
+        text: messageText,
+      };
+    }
+
+    await sendEmail(config, message);
 
     res.status(200).json({ success: true, data: "Email sent" });
   } catch (err) {

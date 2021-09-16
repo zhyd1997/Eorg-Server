@@ -276,4 +276,59 @@ describe("auth", () => {
         });
     });
   });
+
+  describe("forgotPassword", () => {
+    it("returns an error if email provided is not registered", (done) => {
+      request(app)
+        .post(`${AUTH_URI}/forgotpassword`)
+        .send({ email: "test@test.com" })
+        .expect(404)
+        .then((res) => {
+          const { error } = res.body;
+          expect(error).toBe("User not found");
+          done();
+        })
+        .catch((err) => {
+          console.log(err);
+          done(err);
+        });
+    });
+
+    it("returns success", (done) => {
+      request(app)
+        .post(`${AUTH_URI}/forgotpassword`)
+        .send({ email: "testNew@test.com" })
+        .expect(200)
+        .then((res) => {
+          const { success } = res.body;
+          expect(success).toBe(true);
+          done();
+        })
+        .catch((err) => {
+          console.log(err);
+          done(err);
+        });
+    });
+  });
+
+  describe("resetPassword", () => {
+    it("returns an error if token is invalid", (done) => {
+      request(app)
+        .put(`${AUTH_URI}/resetpassword/resetToken`)
+        .send({ password: "testNew1234" })
+        .expect(400)
+        .then((res) => {
+          const { error } = res.body;
+          expect(error).toBe("Invalid token");
+          done();
+        })
+        .catch((err) => {
+          console.log(err);
+          done(err);
+        });
+    });
+
+    // TODO hard to get resetToken
+    it.todo("returns success");
+  });
 });
